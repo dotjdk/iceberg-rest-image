@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM azul/zulu-openjdk:17 AS builder
+FROM azul/zulu-openjdk:21 AS builder
 
 COPY . /app/
 WORKDIR /app/
 
 RUN ["./gradlew", "build", "shadowJar"]
 
-FROM azul/zulu-openjdk:17-jre-headless
+FROM azul/zulu-openjdk:21-jre-headless
 
 RUN \
     set -xeu && \

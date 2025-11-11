@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RESTCatalogServer {
@@ -92,12 +94,22 @@ public class RESTCatalogServer {
     return new CatalogContext(CatalogUtil.buildIcebergCatalog("rest_backend", catalogProperties, hadoopConf), catalogProperties);
   }
 
-  private static String envKeyToPropertyKey(String key, String prefix) {
-    return key
-        .replaceFirst(prefix, "")
-        .replace("__", "-")
-        .replace("_", ".")
-        .toLowerCase(Locale.ROOT);
+  public static String envKeyToPropertyKey(String key, String prefix) {
+    String s = key.
+        replaceFirst("^" + Pattern.quote(prefix), "")
+        .toLowerCase(Locale.ROOT)
+        .replace("__", "-");
+
+    Matcher m = Pattern.compile("_u_([a-z])").matcher(s);
+    StringBuilder sb = new StringBuilder();
+    while (m.find()) {
+      m.appendReplacement(sb, m.group(1).toUpperCase(Locale.ROOT));
+    }
+    m.appendTail(sb);
+    s = sb.toString();
+    s = s.replace("_", ".");
+
+    return s;
   }
 
   public static void main(String[] args) throws Exception {
